@@ -36,21 +36,41 @@ class ArticlesController extends AppController
           }
           $this->Flash->error(__('記事を作成できませんでした')) ;
         }
+        $tags = $this->Articles->Tags->find('list');
+        $this->set('tags', $tags);
         $this->set('article',$article);
       }
       public function edit($slug)
-{
-    $article = $this->Articles->findBySlug($slug)->firstOrFail();
-    if ($this->request->is(['post', 'put'])) {
-        $this->Articles->patchEntity($article, $this->request->getData());
-        if ($this->Articles->save($article)) {
+      {
+        $article = $this->Articles
+        ->findBySlug($slug)
+        ->contain('Tags') // 関連づけられた Tags を読み込む
+        ->firstOrFail();
+        if ($this->request->is(['post', 'put'])) {
+          $this->Articles->patchEntity($article, $this->request->getData());
+          if ($this->Articles->save($article)) {
             $this->Flash->success(__('記事の変更を保存しました'));
-            return $this->redirect(['action' => 'index']);
-        }
+          return $this->redirect(['action' => 'index']);
+          }
         $this->Flash->error(__('記事の変更が保存できませんでした'));
-    }
+        }
+        // タグのリストを取得
+        $tags = $this->Articles->Tags->find('list');
 
-    $this->set('article', $article);
-}
+        // ビューコンテキストに tags をセット
+        $this->set('tags', $tags);
+
+        $this->set('article', $article);
+      }
+      public function delete($slug)
+      {
+        $this->request->allowMethod(['post','delete']);
+
+        $article = $this->Articles->findBySlug($slug)->firstOrFail();
+        if ($this->Articles->delete($article)){
+          $this->Flash->success(__('{0}の記事は削除されました',$article->title));
+          return $this->redirect(['action' => 'index']);
+        }
+      }
 
     }

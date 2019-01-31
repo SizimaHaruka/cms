@@ -7,6 +7,7 @@
         <th>作成日時</th>
     </tr>
 <?= $this->Html->link('記事の追加', ['action' => 'add'])?>
+
     <!-- ここで、$articles クエリーオブジェクトを繰り返して、記事の情報を出力します -->
 
     <?php foreach ($articles as $article): ?>
@@ -16,6 +17,14 @@
         </td>
         <td>
             <?= $article->created->format(DATE_RFC850) ?>
+        </td>
+        <td>
+          <?= $this->Html->link('編集', ['action' => 'edit', $article->slug]) ?>
+            <?= $this->Form->postLink(
+                '削除',
+                ['action' => 'delete', $article->slug],
+                ['confirm' => 'よろしいですか?'])
+            ?>
         </td>
     </tr>
     <?php endforeach; ?>
